@@ -22,101 +22,77 @@ CLASS_NAMES = ["Glioma Tumor", "Meningioma Tumor", "No Tumor", "Pituitary Tumor"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ---------------------------------------------------------
-# Dynamic Light / Dark Theme Injection
+# Permanent Dark Theme Styling & CSS Injection
 # ---------------------------------------------------------
-# Sidebar Theme Switcher
-with st.sidebar:
-    st.image("https://img.icons8.com/color/96/brain.png", width=64)
-    st.title("Control Panel")
-    dark_mode = st.toggle("🌙 Dark Mode", value=False)
-    st.markdown("---")
-
-# Theme Palette Definition
-if dark_mode:
-    bg_color = "#0e1117"
-    card_bg = "#1e222d"
-    card_border = "#31333f"
-    text_primary = "#f1f5f9"
-    text_secondary = "#94a3b8"
-    status_success_bg = "rgba(16, 185, 129, 0.2)"
-    status_success_text = "#6ee7b7"
-    status_success_border = "#059669"
-    status_warning_bg = "rgba(245, 158, 11, 0.2)"
-    status_warning_text = "#fde047"
-    status_warning_border = "#d97706"
-else:
-    bg_color = "#f8f9fa"
-    card_bg = "#ffffff"
-    card_border = "#e9ecef"
-    text_primary = "#1e293b"
-    text_secondary = "#64748b"
-    status_success_bg = "#d4edda"
-    status_success_text = "#155724"
-    status_success_border = "#c3e6cb"
-    status_warning_bg = "#fff3cd"
-    status_warning_text = "#856404"
-    status_warning_border = "#ffeeba"
-
-# Dynamic CSS Injection
-st.markdown(f"""
+st.markdown("""
 <style>
-    /* Main Background & Card Styling */
-    .stApp {{
-        background-color: {bg_color};
-    }}
+    /* Main Background & Text Color */
+    .stApp {
+        background-color: #0e1117;
+        color: #f1f5f9;
+    }
+    
+    /* Global text and label overrides for dark mode consistency */
+    p, span, label, .stMarkdown {
+        color: #f1f5f9 !important;
+    }
+    
+    .stCaption, small {
+        color: #94a3b8 !important;
+    }
     
     /* Diagnostic Cards */
-    .metric-card {{
-        background-color: {card_bg};
+    .metric-card {
+        background-color: #1e222d;
         border-radius: 10px;
         padding: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border: 1px solid {card_border};
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        border: 1px solid #31333f;
         margin-bottom: 15px;
-    }}
+    }
     
-    .metric-card h2 {{
-        color: {text_primary} !important;
+    .metric-card h2 {
+        color: #f1f5f9 !important;
         margin-top: 10px;
         margin-bottom: 0px;
-    }}
+    }
     
-    .metric-card p {{
-        color: {text_secondary} !important;
+    .metric-card p {
+        color: #94a3b8 !important;
         margin-top: 5px;
-    }}
+    }
     
-    .status-badge {{
+    .status-badge {
         display: inline-block;
         padding: 6px 14px;
         border-radius: 20px;
         font-weight: 600;
         font-size: 0.9rem;
-    }}
+    }
     
-    .status-warning {{
-        background-color: {status_warning_bg};
-        color: {status_warning_text};
-        border: 1px solid {status_warning_border};
-    }}
+    .status-warning {
+        background-color: rgba(245, 158, 11, 0.2);
+        color: #fde047;
+        border: 1px solid #d97706;
+    }
     
-    .status-success {{
-        background-color: {status_success_bg};
-        color: {status_success_text};
-        border: 1px solid {status_success_border};
-    }}
+    .status-success {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #6ee7b7;
+        border: 1px solid #059669;
+    }
     
     /* Header Styling */
-    .main-header {{
+    .main-header {
         font-weight: 700;
-        color: {text_primary};
+        color: #f1f5f9;
         margin-bottom: 0.2rem;
-    }}
-    .sub-header {{
-        color: {text_secondary};
+    }
+    .sub-header {
+        color: #94a3b8;
         font-size: 1rem;
         margin-bottom: 2rem;
-    }}
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -223,6 +199,10 @@ def predict_with_svm(image, scaler, model):
 # Sidebar Controls
 # ---------------------------------------------------------
 with st.sidebar:
+    st.image("https://img.icons8.com/color/96/brain.png", width=64)
+    st.title("Control Panel")
+    st.markdown("---")
+    
     selected_model = st.selectbox(
         "Select Inference Engine:",
         ("Vision Transformer (ViT)", "Support Vector Machine (SVM)")
@@ -282,14 +262,12 @@ if uploaded_file is not None:
                         st.error("Model Error: `scaler.pkl` or `svm_model.pkl` missing.")
                 
                 if label:
-                    # Status styling based on tumor presence
                     is_clear = (label == "No Tumor")
                     badge_class = "status-success" if is_clear else "status-warning"
                     status_text = "CLEAR / NORMAL" if is_clear else "PATHOLOGY DETECTED"
                     
                     st.markdown("---")
                     
-                    # Top Result Summary Card
                     st.markdown(f"""
                     <div class="metric-card">
                         <span class="status-badge {badge_class}">{status_text}</span>
@@ -300,7 +278,6 @@ if uploaded_file is not None:
                     
                     st.progress(confidence / 100.0)
                     
-                    # Probabilities breakdown
                     if all_probs:
                         st.markdown("#### Class Distribution")
                         for class_name, prob in all_probs.items():
