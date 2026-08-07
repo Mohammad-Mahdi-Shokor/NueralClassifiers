@@ -25,115 +25,61 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # ---------------------------------------------------------
 # Permanent Dark Theme Styling & CSS Injection
 # ---------------------------------------------------------
-# st.markdown("""
-# <style>
-#     /* Main Background & Text Color */
-#     .stApp {
-#         background-color: #0e1117;
-#         color: #f1f5f9;
-#     }
+st.markdown("""
+<style>
+    /* Full-Screen Drag & Drop Overlay Class (Triggered by JS) */
+    .fullscreen-dropzone {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 999999 !important;
+        background-color: rgba(14, 17, 23, 0.92) !important;
+        border: 4px dashed #3b82f6 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        backdrop-filter: blur(8px) !important;
+    }
     
-#     /* Global text and label overrides for dark mode consistency */
-#     p, span, label, .stMarkdown {
-#         color: #f1f5f9 !important;
-#     }
+/* Diagnostic Cards */
+    .metric-card {
+        background-color: #1e222d;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        border: 1px solid #31333f;
+        margin-bottom: 15px;
+    }
     
-#     .stCaption, small {
-#         color: #94a3b8 !important;
-#     }
+    .metric-card h2 {
+        color: #f1f5f9 !important;
+        margin-top: 10px;
+        margin-bottom: 0px;
+    }
     
-#     /* Enhanced File Uploader Dropzone Styling */
-#     div[data-testid="stFileUploaderDropzone"] {
-#         border: 2px dashed #3b82f6 !important;
-#         background-color: #131722 !important;
-#         border-radius: 12px !important;
-#         padding: 30px !important;
-#         transition: all 0.25s ease-in-out !important;
-#     }
+    .metric-card p {
+        color: #94a3b8 !important;
+        margin-top: 5px;
+    }
     
-#     div[data-testid="stFileUploaderDropzone"]:hover {
-#         background-color: #1e2433 !important;
-#         border-color: #60a5fa !important;
-#     }
+    .status-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
     
-#     /* Full-Screen Drag & Drop Overlay Class (Triggered by JS) */
-#     .fullscreen-dropzone {
-#         position: fixed !important;
-#         top: 0 !important;
-#         left: 0 !important;
-#         width: 100vw !important;
-#         height: 100vh !important;
-#         z-index: 999999 !important;
-#         background-color: rgba(14, 17, 23, 0.92) !important;
-#         border: 4px dashed #3b82f6 !important;
-#         display: flex !important;
-#         align-items: center !important;
-#         justify-content: center !important;
-#         backdrop-filter: blur(8px) !important;
-#     }
-    
-#     /* Force buttons inside the 300px preview container to respect 300px width */
-#     div[style*="width: 300px"] button {
-#         width: 100% !important;
-#         max-width: 300px !important;
-#         display: block !important;
-#         margin: 0 auto !important;
-#     }
-    
-#     /* Diagnostic Cards */
-#     .metric-card {
-#         background-color: #1e222d;
-#         border-radius: 10px;
-#         padding: 20px;
-#         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-#         border: 1px solid #31333f;
-#         margin-bottom: 15px;
-#     }
-    
-#     .metric-card h2 {
-#         color: #f1f5f9 !important;
-#         margin-top: 10px;
-#         margin-bottom: 0px;
-#     }
-    
-#     .metric-card p {
-#         color: #94a3b8 !important;
-#         margin-top: 5px;
-#     }
-    
-#     .status-badge {
-#         display: inline-block;
-#         padding: 6px 14px;
-#         border-radius: 20px;
-#         font-weight: 600;
-#         font-size: 0.9rem;
-#     }
-    
-#     .status-warning {
-#         background-color: rgba(245, 158, 11, 0.2);
-#         color: #fde047;
-#         border: 1px solid #d97706;
-#     }
-    
-#     .status-success {
-#         background-color: rgba(16, 185, 129, 0.2);
-#         color: #6ee7b7;
-#         border: 1px solid #059669;
-#     }
-    
-#     /* Header Styling */
-#     .main-header {
-#         font-weight: 700;
-#         color: #f1f5f9;
-#         margin-bottom: 0.2rem;
-#     }
-#     .sub-header {
-#         color: #94a3b8;
-#         font-size: 1rem;
-#         margin-bottom: 2rem;
-#     }
-# </style>
-# """, unsafe_allow_html=True)
+    .status-warning {
+        background-color: rgba(245, 158, 11, 0.2);
+        color: #fde047;
+        border: 1px solid #d97706;
+    }
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # Full-Screen Drag & Drop JavaScript Injection
@@ -323,7 +269,7 @@ if uploaded_file is not None:
     if not st.session_state.executed:
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            # st.markdown("### Input MRI Scan")
+            st.markdown("### Input MRI Scan")
             
             # Display image filling the full width of the column
             st.image(image, use_container_width=True)
@@ -337,7 +283,7 @@ if uploaded_file is not None:
                 
     # STATE 2: Full side-by-side post-execution view
     else:
-        col_img, col_diag = st.columns([2, 3], gap="large")
+        col_img, col_diag = st.columns([45,55], gap="large")
         
         with col_img:
             st.markdown("### Input MRI Scan")
@@ -371,7 +317,6 @@ if uploaded_file is not None:
                     badge_class = "status-success" if is_clear else "status-warning"
                     status_text = "CLEAR / NORMAL" if is_clear else "PATHOLOGY DETECTED"
                     
-                    st.markdown("---")
                     
                     st.markdown(f"""
                     <div class="metric-card">
