@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from PIL import Image
 import streamlit as st
+import streamlit.components.v1 as components
 from torchvision import transforms
 from transformers import ViTForImageClassification, ViTImageProcessor
 
@@ -39,6 +40,44 @@ st.markdown("""
     
     .stCaption, small {
         color: #94a3b8 !important;
+    }
+    
+    /* Enhanced File Uploader Dropzone Styling */
+    div[data-testid="stFileUploaderDropzone"] {
+        border: 2px dashed #3b82f6 !important;
+        background-color: #131722 !important;
+        border-radius: 12px !important;
+        padding: 30px !important;
+        transition: all 0.25s ease-in-out !important;
+    }
+    
+    div[data-testid="stFileUploaderDropzone"]:hover {
+        background-color: #1e2433 !important;
+        border-color: #60a5fa !important;
+    }
+    
+    /* Full-Screen Drag & Drop Overlay Class (Triggered by JS) */
+    .fullscreen-dropzone {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 999999 !important;
+        background-color: rgba(14, 17, 23, 0.92) !important;
+        border: 4px dashed #3b82f6 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        backdrop-filter: blur(8px) !important;
+    }
+    
+    /* Force buttons inside the 300px preview container to respect 300px width */
+    div[style*="width: 300px"] button {
+        width: 100% !important;
+        max-width: 300px !important;
+        display: block !important;
+        margin: 0 auto !important;
     }
     
     /* Diagnostic Cards */
@@ -95,6 +134,47 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# Full-Screen Drag & Drop JavaScript Injection
+# ---------------------------------------------------------
+components.html("""
+<script>
+const parentDoc = window.parent.document;
+let dragCounter = 0;
+
+parentDoc.addEventListener('dragenter', (e) => {
+    if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+        dragCounter++;
+        const dropzone = parentDoc.querySelector('[data-testid="stFileUploaderDropzone"]');
+        if (dropzone) {
+            dropzone.classList.add('fullscreen-dropzone');
+        }
+    }
+});
+
+parentDoc.addEventListener('dragleave', (e) => {
+    if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+        dragCounter--;
+        if (dragCounter <= 0) {
+            dragCounter = 0;
+            const dropzone = parentDoc.querySelector('[data-testid="stFileUploaderDropzone"]');
+            if (dropzone) {
+                dropzone.classList.remove('fullscreen-dropzone');
+            }
+        }
+    }
+});
+
+parentDoc.addEventListener('drop', (e) => {
+    dragCounter = 0;
+    const dropzone = parentDoc.querySelector('[data-testid="stFileUploaderDropzone"]');
+    if (dropzone) {
+        dropzone.classList.remove('fullscreen-dropzone');
+    }
+});
+</script>
+""", height=0)
 
 # ---------------------------------------------------------
 # Resource Caching
@@ -229,21 +309,46 @@ uploaded_file = st.file_uploader(
     help="For best results, upload clean, centered brain MRI scans."
 )
 
+if "executed" not in st.session_state:
+    st.session_state.executed = False
+
 if uploaded_file is not None:
+    if "last_file" not in st.session_state or st.session_state.last_file != uploaded_file.name:
+        st.session_state.last_file = uploaded_file.name
+        st.session_state.executed = False
+
     image = Image.open(uploaded_file)
     
-    col_img, col_diag = st.columns([1, 1], gap="large")
-    
-    with col_img:
-        st.markdown("### Input MRI Scan")
-        st.image(image, use_container_width=True)
+    # STATE 1: Full column width preview with matching full-width button
+    if not st.session_state.executed:
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            # st.markdown("### Input MRI Scan")
+            
+            # Display image filling the full width of the column
+            st.image(image, use_container_width=True)
+            
+            # Button automatically matches the full width of the column
+            run_button = st.button("⚡ Execute Classification", type="primary", use_container_width=True)
+            
+            if run_button:
+                st.session_state.executed = True
+                st.rerun()
+                
+    # STATE 2: Full side-by-side post-execution view
+    else:
+        col_img, col_diag = st.columns([2, 3], gap="large")
         
-    with col_diag:
-        st.markdown("### Diagnostic Analysis")
-        
-        run_button = st.button("⚡ Execute Classification", type="primary", use_container_width=True)
-        
-        if run_button:
+        with col_img:
+            st.markdown("### Input MRI Scan")
+            st.image(image, use_container_width=True)
+            if st.button("🔄 Upload / Analyze Another Scan"):
+                st.session_state.executed = False
+                st.rerun()
+            
+        with col_diag:
+            st.markdown("### Diagnostic Analysis")
+            
             with st.spinner(f"Analyzing scan via {selected_model}..."):
                 label, confidence, all_probs = None, None, None
                 
@@ -284,4 +389,5 @@ if uploaded_file is not None:
                             st.caption(f"{class_name}: {prob:.1f}%")
                             st.progress(prob / 100.0)
 else:
+    st.session_state.executed = False
     st.info("👆 Please upload an MRI scan image to begin analysis.")
