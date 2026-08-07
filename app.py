@@ -25,115 +25,115 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # ---------------------------------------------------------
 # Permanent Dark Theme Styling & CSS Injection
 # ---------------------------------------------------------
-st.markdown("""
-<style>
-    /* Main Background & Text Color */
-    .stApp {
-        background-color: #0e1117;
-        color: #f1f5f9;
-    }
+# st.markdown("""
+# <style>
+#     /* Main Background & Text Color */
+#     .stApp {
+#         background-color: #0e1117;
+#         color: #f1f5f9;
+#     }
     
-    /* Global text and label overrides for dark mode consistency */
-    p, span, label, .stMarkdown {
-        color: #f1f5f9 !important;
-    }
+#     /* Global text and label overrides for dark mode consistency */
+#     p, span, label, .stMarkdown {
+#         color: #f1f5f9 !important;
+#     }
     
-    .stCaption, small {
-        color: #94a3b8 !important;
-    }
+#     .stCaption, small {
+#         color: #94a3b8 !important;
+#     }
     
-    /* Enhanced File Uploader Dropzone Styling */
-    div[data-testid="stFileUploaderDropzone"] {
-        border: 2px dashed #3b82f6 !important;
-        background-color: #131722 !important;
-        border-radius: 12px !important;
-        padding: 30px !important;
-        transition: all 0.25s ease-in-out !important;
-    }
+#     /* Enhanced File Uploader Dropzone Styling */
+#     div[data-testid="stFileUploaderDropzone"] {
+#         border: 2px dashed #3b82f6 !important;
+#         background-color: #131722 !important;
+#         border-radius: 12px !important;
+#         padding: 30px !important;
+#         transition: all 0.25s ease-in-out !important;
+#     }
     
-    div[data-testid="stFileUploaderDropzone"]:hover {
-        background-color: #1e2433 !important;
-        border-color: #60a5fa !important;
-    }
+#     div[data-testid="stFileUploaderDropzone"]:hover {
+#         background-color: #1e2433 !important;
+#         border-color: #60a5fa !important;
+#     }
     
-    /* Full-Screen Drag & Drop Overlay Class (Triggered by JS) */
-    .fullscreen-dropzone {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        z-index: 999999 !important;
-        background-color: rgba(14, 17, 23, 0.92) !important;
-        border: 4px dashed #3b82f6 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        backdrop-filter: blur(8px) !important;
-    }
+#     /* Full-Screen Drag & Drop Overlay Class (Triggered by JS) */
+#     .fullscreen-dropzone {
+#         position: fixed !important;
+#         top: 0 !important;
+#         left: 0 !important;
+#         width: 100vw !important;
+#         height: 100vh !important;
+#         z-index: 999999 !important;
+#         background-color: rgba(14, 17, 23, 0.92) !important;
+#         border: 4px dashed #3b82f6 !important;
+#         display: flex !important;
+#         align-items: center !important;
+#         justify-content: center !important;
+#         backdrop-filter: blur(8px) !important;
+#     }
     
-    /* Force buttons inside the 300px preview container to respect 300px width */
-    div[style*="width: 300px"] button {
-        width: 100% !important;
-        max-width: 300px !important;
-        display: block !important;
-        margin: 0 auto !important;
-    }
+#     /* Force buttons inside the 300px preview container to respect 300px width */
+#     div[style*="width: 300px"] button {
+#         width: 100% !important;
+#         max-width: 300px !important;
+#         display: block !important;
+#         margin: 0 auto !important;
+#     }
     
-    /* Diagnostic Cards */
-    .metric-card {
-        background-color: #1e222d;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        border: 1px solid #31333f;
-        margin-bottom: 15px;
-    }
+#     /* Diagnostic Cards */
+#     .metric-card {
+#         background-color: #1e222d;
+#         border-radius: 10px;
+#         padding: 20px;
+#         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+#         border: 1px solid #31333f;
+#         margin-bottom: 15px;
+#     }
     
-    .metric-card h2 {
-        color: #f1f5f9 !important;
-        margin-top: 10px;
-        margin-bottom: 0px;
-    }
+#     .metric-card h2 {
+#         color: #f1f5f9 !important;
+#         margin-top: 10px;
+#         margin-bottom: 0px;
+#     }
     
-    .metric-card p {
-        color: #94a3b8 !important;
-        margin-top: 5px;
-    }
+#     .metric-card p {
+#         color: #94a3b8 !important;
+#         margin-top: 5px;
+#     }
     
-    .status-badge {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
+#     .status-badge {
+#         display: inline-block;
+#         padding: 6px 14px;
+#         border-radius: 20px;
+#         font-weight: 600;
+#         font-size: 0.9rem;
+#     }
     
-    .status-warning {
-        background-color: rgba(245, 158, 11, 0.2);
-        color: #fde047;
-        border: 1px solid #d97706;
-    }
+#     .status-warning {
+#         background-color: rgba(245, 158, 11, 0.2);
+#         color: #fde047;
+#         border: 1px solid #d97706;
+#     }
     
-    .status-success {
-        background-color: rgba(16, 185, 129, 0.2);
-        color: #6ee7b7;
-        border: 1px solid #059669;
-    }
+#     .status-success {
+#         background-color: rgba(16, 185, 129, 0.2);
+#         color: #6ee7b7;
+#         border: 1px solid #059669;
+#     }
     
-    /* Header Styling */
-    .main-header {
-        font-weight: 700;
-        color: #f1f5f9;
-        margin-bottom: 0.2rem;
-    }
-    .sub-header {
-        color: #94a3b8;
-        font-size: 1rem;
-        margin-bottom: 2rem;
-    }
-</style>
-""", unsafe_allow_html=True)
+#     /* Header Styling */
+#     .main-header {
+#         font-weight: 700;
+#         color: #f1f5f9;
+#         margin-bottom: 0.2rem;
+#     }
+#     .sub-header {
+#         color: #94a3b8;
+#         font-size: 1rem;
+#         margin-bottom: 2rem;
+#     }
+# </style>
+# """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # Full-Screen Drag & Drop JavaScript Injection
