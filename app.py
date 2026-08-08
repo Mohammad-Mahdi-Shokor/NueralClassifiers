@@ -77,6 +77,29 @@ st.markdown("""
         color: #fde047;
         border: 1px solid #d97706;
     }
+    /* Fixed Bottom Footer */
+    footer {
+        visibility: hidden !important;
+        display: none !important;
+    }
+    
+    .main .block-container {
+        padding-bottom: 100px !important;
+    }
+    
+    .fixed-footer {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        background: rgba(14, 17, 23, 0.94) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 10px 20px !important;
+        text-align: center !important;
+        z-index: 99999 !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -242,6 +265,17 @@ with st.sidebar:
     * 🟢 **No Tumor**
     * 🟡 **Pituitary Tumor**
     """)
+    
+    st.markdown("---")
+    st.markdown("### 🎓 Program Credit")
+    st.markdown("**AIxMED Summer Saturdays**")
+    st.markdown("""
+    **Authors:**
+    * Ahlam Al Zoghbi
+    * Sundos Bekdash
+    * Mohammad Mahdi Shokor
+    * Ali Al Hadi Khalil
+    """)
 
 # ---------------------------------------------------------
 # Main UI Layout
@@ -269,7 +303,7 @@ if uploaded_file is not None:
     if not st.session_state.executed:
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            st.markdown("### Input MRI Scan")
+            st.markdown("<h3 style='text-align: center;'>Input MRI Scan</h3>", unsafe_allow_html=True)
             
             # Display image filling the full width of the column
             st.image(image, use_container_width=True)
@@ -336,3 +370,27 @@ if uploaded_file is not None:
 else:
     st.session_state.executed = False
     st.info("👆 Please upload an MRI scan image to begin analysis.")
+
+# ---------------------------------------------------------
+# Fixed Bottom Footer & Credits
+# ---------------------------------------------------------
+st.markdown("""
+<div class="fixed-footer">
+    <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 14px; max-width: 1200px; margin: 0 auto;">
+        <span style="font-size: 0.95rem; font-weight: 600; color: #f1f5f9; white-space: nowrap;">
+            🎓 Created for <span style="color: #60a5fa;">AIxMED Summer Saturdays</span>
+        </span>
+        <span style="color: #475569; font-size: 0.85rem;">|</span>
+        <span style="font-size: 0.88rem; color: #94a3b8; font-weight: 500; white-space: nowrap;">
+            Project Authors:
+        </span>
+        <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;">
+            <span style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">Ahlam Al Zoghbi</span>
+            <span style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">Sundos Bekdash</span>
+            <span style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">Mohammad Mahdi Shokor</span>
+            <span style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">Ali Al Hadi Khalil</span>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
