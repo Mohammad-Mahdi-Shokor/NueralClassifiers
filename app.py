@@ -1,17 +1,10 @@
 import os
-import joblib
-import numpy as np
 import torch
-import torch.nn as nn
 from PIL import Image
 import streamlit as st
 import streamlit.components.v1 as components
-from torchvision import transforms
 from transformers import ViTForImageClassification, ViTImageProcessor
 
-# ---------------------------------------------------------
-# Page Configuration
-# ---------------------------------------------------------
 st.set_page_config(
     page_title="Brain Tumor MRI Diagnostic Suite",
     page_icon="🧠",
@@ -22,12 +15,8 @@ st.set_page_config(
 CLASS_NAMES = ["Glioma Tumor", "Meningioma Tumor", "No Tumor", "Pituitary Tumor"]
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# ---------------------------------------------------------
-# Permanent Dark Theme Styling & CSS Injection
-# ---------------------------------------------------------
 st.markdown("""
 <style>
-    /* Full-Screen Drag & Drop Overlay Class (Triggered by JS) */
     .fullscreen-dropzone {
         position: fixed !important;
         top: 0 !important;
@@ -43,7 +32,6 @@ st.markdown("""
         backdrop-filter: blur(8px) !important;
     }
     
-/* Diagnostic Cards */
     .metric-card {
         background-color: #1e222d;
         border-radius: 10px;
@@ -77,7 +65,13 @@ st.markdown("""
         color: #fde047;
         border: 1px solid #d97706;
     }
-    /* Fixed Bottom Footer */
+
+    .status-success {
+        background-color: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+        border: 1px solid #22c55e;
+    }
+
     footer {
         visibility: hidden !important;
         display: none !important;
@@ -104,9 +98,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# Full-Screen Drag & Drop JavaScript Injection
-# ---------------------------------------------------------
 components.html("""
 <script>
 const parentDoc = window.parent.document;
@@ -145,12 +136,9 @@ parentDoc.addEventListener('drop', (e) => {
 </script>
 """, height=0)
 
-# ---------------------------------------------------------
-# Resource Caching
-# ---------------------------------------------------------
+
 @st.cache_resource
 def load_vit_model():
-    """Load and cache the Hugging Face Vision Transformer (ViT)."""
     try:
         model_name = "google/vit-base-patch16-224"
         processor = ViTImageProcessor.from_pretrained(model_name)
@@ -186,25 +174,7 @@ def load_vit_model():
         st.error(f"ViT Load Error: {str(e)}")
         return None, None
 
-@st.cache_resource
-def load_svm_model():
-    """Load and cache the SVM model and StandardScaler."""
-    try:
-        scaler_path = os.path.join(BASE_DIR, 'scaler.pkl')
-        svm_path = os.path.join(BASE_DIR, 'svm_model.pkl')
-        
-        if not (os.path.exists(scaler_path) and os.path.exists(svm_path)):
-            return None, None
-            
-        scaler = joblib.load(scaler_path)
-        model = joblib.load(svm_path)
-        return scaler, model
-    except Exception as e:
-        return None, None
 
-# ---------------------------------------------------------
-# Prediction Engines
-# ---------------------------------------------------------
 def predict_with_vit(image, processor, model):
     if image.mode != "RGB":
         image = image.convert("RGB")
@@ -221,41 +191,14 @@ def predict_with_vit(image, processor, model):
     all_probs = {CLASS_NAMES[i]: probabilities[i].item() * 100 for i in range(len(CLASS_NAMES))}
     return CLASS_NAMES[predicted_idx], confidence, all_probs
 
-def predict_with_svm(image, scaler, model):
-    transform = transforms.Compose([
-        transforms.Resize((64, 64)),
-        transforms.Grayscale(num_output_channels=1),
-        transforms.ToTensor()
-    ])
-    
-    img_tensor = transform(image)
-    img_array = img_tensor.numpy().flatten().reshape(1, -1)
-    img_scaled = scaler.transform(img_array)
-    
-    predicted_idx = model.predict(img_scaled)[0]
-    
-    if hasattr(model, "predict_proba"):
-        probabilities = model.predict_proba(img_scaled)[0]
-        confidence = probabilities[predicted_idx] * 100
-        all_probs = {CLASS_NAMES[i]: probabilities[i] * 100 for i in range(len(CLASS_NAMES))}
-    else:
-        confidence = 94.16
-        all_probs = {name: (94.16 if name == CLASS_NAMES[predicted_idx] else 1.94) for name in CLASS_NAMES}
-        
-    return CLASS_NAMES[predicted_idx], confidence, all_probs
 
-# ---------------------------------------------------------
-# Sidebar Controls
-# ---------------------------------------------------------
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/brain.png", width=64)
-    st.title("Control Panel")
-    st.markdown("---")
-    
-    selected_model = st.selectbox(
-        "Select Inference Engine:",
-        ("Vision Transformer (ViT)", "Support Vector Machine (SVM)")
-    )
+    st.markdown("""
+    <div style="text-align: center;">
+        <img src="https://img.icons8.com/color/96/brain.png" width="64">
+        <h2 style="margin-top: 8px; margin-bottom: 0px;">Neural Classifiers</h2>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("---")
     st.markdown("### Target Diagnoses")
@@ -277,9 +220,7 @@ with st.sidebar:
     * Ali Al Hadi Khalil
     """)
 
-# ---------------------------------------------------------
-# Main UI Layout
-# ---------------------------------------------------------
+
 st.markdown("<h1 class='main-header'>🧠 Brain Tumor MRI Classifier</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-header'>Upload an axial brain MRI scan to evaluate target region classifications.</p>", unsafe_allow_html=True)
 
@@ -299,25 +240,18 @@ if uploaded_file is not None:
 
     image = Image.open(uploaded_file)
     
-    # STATE 1: Full column width preview with matching full-width button
     if not st.session_state.executed:
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
             st.markdown("<h3 style='text-align: center;'>Input MRI Scan</h3>", unsafe_allow_html=True)
-            
-            # Display image filling the full width of the column
             st.image(image, use_container_width=True)
-            
-            # Button automatically matches the full width of the column
             run_button = st.button("⚡ Execute Classification", type="primary", use_container_width=True)
             
             if run_button:
                 st.session_state.executed = True
                 st.rerun()
-                
-    # STATE 2: Full side-by-side post-execution view
     else:
-        col_img, col_diag = st.columns([45,55], gap="large")
+        col_img, col_diag = st.columns([45, 55], gap="large")
         
         with col_img:
             st.markdown("### Input MRI Scan")
@@ -329,28 +263,18 @@ if uploaded_file is not None:
         with col_diag:
             st.markdown("### Diagnostic Analysis")
             
-            with st.spinner(f"Analyzing scan via {selected_model}..."):
-                label, confidence, all_probs = None, None, None
-                
-                if selected_model == "Vision Transformer (ViT)":
-                    processor, vit_model = load_vit_model()
-                    if vit_model is not None and processor is not None:
-                        label, confidence, all_probs = predict_with_vit(image, processor, vit_model)
-                    else:
-                        st.error("Model Error: `vit_model.pth` missing or corrupt.")
-                        
-                elif selected_model == "Support Vector Machine (SVM)":
-                    scaler, svm_model = load_svm_model()
-                    if svm_model is not None and scaler is not None:
-                        label, confidence, all_probs = predict_with_svm(image, scaler, svm_model)
-                    else:
-                        st.error("Model Error: `scaler.pkl` or `svm_model.pkl` missing.")
+            with st.spinner("Analyzing scan via Vision Transformer (ViT)..."):
+                processor, vit_model = load_vit_model()
+                if vit_model is not None and processor is not None:
+                    label, confidence, all_probs = predict_with_vit(image, processor, vit_model)
+                else:
+                    st.error("Model Error: `vit_model.pth` missing or corrupt.")
+                    label, confidence, all_probs = None, None, None
                 
                 if label:
                     is_clear = (label == "No Tumor")
                     badge_class = "status-success" if is_clear else "status-warning"
                     status_text = "CLEAR / NORMAL" if is_clear else "PATHOLOGY DETECTED"
-                    
                     
                     st.markdown(f"""
                     <div class="metric-card">
@@ -371,9 +295,7 @@ else:
     st.session_state.executed = False
     st.info("👆 Please upload an MRI scan image to begin analysis.")
 
-# ---------------------------------------------------------
-# Fixed Bottom Footer & Credits
-# ---------------------------------------------------------
+
 st.markdown("""
 <div class="fixed-footer">
     <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 14px; max-width: 1200px; margin: 0 auto;">
@@ -393,4 +315,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
