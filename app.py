@@ -205,8 +205,8 @@ with st.sidebar:
     st.markdown("""
     * 🔴 **Glioma Tumor**
     * 🟠 **Meningioma Tumor**
-    * 🟢 **No Tumor**
     * 🟡 **Pituitary Tumor**
+    * 🟢 **No Tumor**
     """)
     
     st.markdown("---")
